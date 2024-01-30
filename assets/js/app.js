@@ -68,7 +68,7 @@ $(document).ready(function () {
   // display the 5 day weather forecast by looping through the forecast
   // and rendering out a day with the proper properties.
   function displayWeatherForecast(forecast) {
-    var weatherResultsContainer = $('#weatherResults');
+    var forecastContainerEl = $('#forecast');
     var forecastRow = $('<section>').addClass('justify-content-around row');
 
     for (var i = 0; i < forecast.length; i++) {
@@ -82,7 +82,7 @@ $(document).ready(function () {
 
       forecastCol.append(dateEl, weatherIconEl, statsEl);
       forecastRow.append(forecastCol);
-      weatherResultsContainer.append(forecastRow);
+      forecastContainerEl.append(forecastRow);
     }
   }
 
@@ -126,17 +126,13 @@ $(document).ready(function () {
 
   // render the current weather component
   function displayCurrentWeather(data) {
-    var weatherResultsContainer = $('#weatherResults');
-    var currentWeatherContainerEl = $('<section>').addClass(
-      'border rounded border w-100 p-1'
-    );
+    var currentWeatherContainerEl = $('#currentWeather');
+
     var currentWeatherTitleEl = createCurrentWeatherTitle(data);
     currentWeatherTitleEl.appendTo(currentWeatherContainerEl);
 
     var currentWeatherStats = createCurrentWeatherStats(data);
     currentWeatherStats.appendTo(currentWeatherContainerEl);
-
-    currentWeatherContainerEl.appendTo(weatherResultsContainer);
   }
 
   // Render an error for the element passed in and assign it the error message
@@ -152,7 +148,7 @@ $(document).ready(function () {
   function handleFormSubmit(event) {
     event.preventDefault();
 
-    $('#weatherResults').empty();
+    emptyResults();
 
     clearError($('.search-error'));
 
@@ -161,6 +157,7 @@ $(document).ready(function () {
 
     if (!isFormValid) {
       renderError($('.search-error'), 'Please enter a city');
+      return;
     }
 
     $(this.reset());
@@ -250,10 +247,15 @@ $(document).ready(function () {
       });
   }
 
+  function emptyResults() {
+    $('#currentWeather').empty();
+    $('#forecast').empty();
+  }
+
   // search for weather by the button value of the clicked button
   function searchByButtonClick(e) {
     if ($(e.target).is('button')) {
-      $('#weatherResults').empty();
+      emptyResults();
       var cityVal = $(e.target).text();
       city = cityVal;
       getLatAndLon(cityVal);
