@@ -2,8 +2,63 @@ $(document).ready(function () {
   var API_KEY = 'a46b075efc1105478039f5ecdad334e4';
   var baseURL = 'https://api.openweathermap.org';
   var city = '';
-  var currentLatitude;
-  var currentLongitude;
+  var previousSearches = JSON.parse(localStorage.getItem('searches')) ?? [];
+
+  // display the previous weather results
+  // if a previous search exists use the city to make a new request
+  // to get weather results
+  function displayPreviousWeatherResults() {
+    if (previousSearches.length > 0) {
+      var previousCity = previousSearches[0].city;
+      city = previousCity;
+      getLatAndLon(city);
+    }
+  }
+
+  // check to see if search exists if it does do not save it to local storage if not save it to local storage
+  function saveSearch(city, isNew) {
+    var isDuplicate = previousSearches.findIndex(function (search) {
+      return search.city === city.toLowerCase();
+    });
+
+    if (isDuplicate !== -1) {
+      return;
+    }
+
+    if (isNew) {
+      previousSearches.push({
+        city: city.toLowerCase(),
+        id: previousSearches.length,
+      });
+      displayPreviousSearches(
+        isNew,
+        previousSearches[previousSearches.length - 1]
+      );
+    }
+    localStorage.setItem('searches', JSON.stringify(previousSearches));
+  }
+
+  function createPreviousSearch(city) {
+    return $('<button>')
+      .addClass('btn city-btn btn-secondary w-100 my-1')
+      .text(city);
+  }
+
+  // create a button for each previous search
+  function displayPreviousSearches(isNew, previousSearch) {
+    var searchesContainerEl = $('#searches');
+
+    if (isNew && previousSearch !== null) {
+      searchesContainerEl.append(createPreviousSearch(previousSearch.city));
+      return;
+    }
+
+    for (var i = 0; i < previousSearches.length; i++) {
+      searchesContainerEl.append(
+        createPreviousSearch(previousSearches[i].city)
+      );
+    }
+  }
 
   // Check if form input is empty
   function validateForm(cityVal) {
@@ -110,6 +165,8 @@ $(document).ready(function () {
 
     $(this.reset());
     city = cityVal;
+
+    saveSearch(city, true);
     getLatAndLon(cityVal);
   }
 
@@ -189,14 +246,27 @@ $(document).ready(function () {
         return getCurrentWeather(lat, lon);
       })
       .then(function (data) {
-        console.log(data);
         getWeatherForecast(data.lat, data.lon);
       });
   }
 
-  function init() {
-    //renderPreviousWeather
+  // search for weather by the button value of the clicked button
+  function searchByButtonClick(e) {
+    if ($(e.target).is('button')) {
+      $('#weatherResults').empty();
+      var cityVal = $(e.target).text();
+      city = cityVal;
+      getLatAndLon(cityVal);
+    }
   }
 
+  function init() {
+    displayPreviousSearches(false, null);
+    displayPreviousWeatherResults();
+  }
+
+  init();
+
   $('#form').on('submit', handleFormSubmit);
+  $('#searches').on('click', '.city-btn', searchByButtonClick);
 });
