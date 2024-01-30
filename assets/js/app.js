@@ -10,6 +10,80 @@ $(document).ready(function () {
     return !(cityVal.trim().length === 0);
   }
 
+  // display the 5 day weather forecast by looping through the forecast
+  // and rendering out a day with the proper properties.
+  function displayWeatherForecast(forecast) {
+    var weatherResultsContainer = $('#weatherResults');
+    var forecastRow = $('<section>').addClass('justify-content-around row');
+
+    for (var i = 0; i < forecast.length; i++) {
+      var forecastCol = $('<div>').addClass('col bg-dark rounded m-2 p-1');
+      var dateEl = $('<h3>')
+        .addClass('text-light h6')
+        .text(dayjs(forecast[i].dt_txt).format('MM/DD/YYYY'));
+      var weatherIconEl = createWeatherIconImage(forecast[i].weather[0].icon);
+      var statsEl = createCurrentWeatherStats(forecast[i]);
+      $(statsEl).addClass('text-light');
+
+      forecastCol.append(dateEl, weatherIconEl, statsEl);
+      forecastRow.append(forecastCol);
+      weatherResultsContainer.append(forecastRow);
+    }
+  }
+
+  // create an image and set its src attribute to equal weather icon
+  function createWeatherIconImage(iconName) {
+    var weatherIconImageEl = $('<img>');
+    weatherIconImageEl.attr({
+      src: 'https://openweathermap.org/img/w/' + iconName + '.png',
+    });
+
+    return weatherIconImageEl;
+  }
+
+  // Create the title of the current weather that includes the title, date, and weather icon
+  function createCurrentWeatherTitle(data) {
+    var containerEl = $('<div>').addClass('d-flex align-items-center');
+    var currentDate = dayjs().format('MM/DD/YYYY');
+
+    var titleEl = $('<h2>')
+      .append(city + ' (' + currentDate + ')')
+      .addClass('text-dark me-2');
+    var weatherIconImageEl = createWeatherIconImage(data.weather[0].icon);
+
+    titleEl.appendTo(containerEl);
+    weatherIconImageEl.appendTo(containerEl);
+
+    return containerEl;
+  }
+
+  // append all the weather stats to a container element
+  function createCurrentWeatherStats(data) {
+    var containerEl = $('<div>').addClass('m-1');
+    var tempEl = $('<p>').text('Temp: ' + data.main.temp + '\u00B0F');
+    var windEl = $('<p>').text('Wind: ' + data.wind.speed + 'MPH');
+    var humidityEl = $('<p>').text('Humidity: ' + data.main.humidity + '%');
+
+    containerEl.append(tempEl, windEl, humidityEl);
+
+    return containerEl;
+  }
+
+  // render the current weather component
+  function displayCurrentWeather(data) {
+    var weatherResultsContainer = $('#weatherResults');
+    var currentWeatherContainerEl = $('<section>').addClass(
+      'border rounded border w-100 p-1'
+    );
+    var currentWeatherTitleEl = createCurrentWeatherTitle(data);
+    currentWeatherTitleEl.appendTo(currentWeatherContainerEl);
+
+    var currentWeatherStats = createCurrentWeatherStats(data);
+    currentWeatherStats.appendTo(currentWeatherContainerEl);
+
+    currentWeatherContainerEl.appendTo(weatherResultsContainer);
+  }
+
   // Render an error for the element passed in and assign it the error message
   function renderError(targetEl, errorMessage) {
     targetEl.addClass('text-danger').text(errorMessage);
@@ -22,6 +96,8 @@ $(document).ready(function () {
 
   function handleFormSubmit(event) {
     event.preventDefault();
+
+    $('#weatherResults').empty();
 
     clearError($('.search-error'));
 
@@ -39,7 +115,7 @@ $(document).ready(function () {
 
   // because the OpenWeather API returns a forecast for five days for every 3 hours
   // the returned list has a count of 40 so we need to loop through it and pick every
-  // 5th day
+  // x item
   function parseFiveDayForecast(data) {
     var uniqueDayNames = [];
     var fiveDayForecast = [];
@@ -63,6 +139,7 @@ $(document).ready(function () {
       lat +
       '&lon=' +
       lon +
+      '&units=imperial' +
       '&appid=' +
       API_KEY;
 
@@ -72,7 +149,7 @@ $(document).ready(function () {
       })
       .then(function (data) {
         var fiveDayForecast = parseFiveDayForecast(data);
-        console.log(`five day forecast:`, fiveDayForecast);
+        displayWeatherForecast(fiveDayForecast);
       });
   }
 
@@ -84,6 +161,7 @@ $(document).ready(function () {
       lat +
       '&lon=' +
       lon +
+      '&units=imperial' +
       '&appid=' +
       API_KEY;
 
@@ -92,8 +170,9 @@ $(document).ready(function () {
         return response.json();
       })
       .then(function (data) {
-        console.log(`current weather:`, data);
+        displayCurrentWeather(data);
       });
+    return { lat, lon };
   }
 
   // gets the latitude and longitude from OpenWeather API
@@ -107,13 +186,16 @@ $(document).ready(function () {
       .then(function (data) {
         var lat = data[0].lat;
         var lon = data[0].lon;
-        getCurrentWeather(lat, lon);
-        getWeatherForecast(lat, lon);
+        return getCurrentWeather(lat, lon);
+      })
+      .then(function (data) {
+        console.log(data);
+        getWeatherForecast(data.lat, data.lon);
       });
   }
 
   function init() {
-    //displayCurrentWeather();
+    //renderPreviousWeather
   }
 
   $('#form').on('submit', handleFormSubmit);
