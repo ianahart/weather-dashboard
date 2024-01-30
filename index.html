@@ -25,18 +25,25 @@
           <div class="col-12 col-md-12 col-lg-4 border p-2">
             <section>
               <h2 class="text-dark">Search For City:</h2>
-              <form>
+              <form id="form">
+                <p class="search-error"></p>
                 <input
+                  id="city"
+                  name="city"
                   class="w-100 input"
                   type="text"
                   placeholder="San Diego"
                 />
+                <div class="mt-3">
+                  <button
+                    type="submit"
+                    id="searchBtn"
+                    class="btn btn-primary w-100"
+                  >
+                    Search
+                  </button>
+                </div>
               </form>
-              <div class="mt-3">
-                <button id="searchBtn" class="btn btn-primary w-100">
-                  Search
-                </button>
-              </div>
               <hr class="bg-danger border-2 border-top border-secondary" />
             </section>
             <section id="recentSearches"></section>
@@ -48,6 +55,7 @@
         </div>
       </section>
     </main>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
     <script
       src="https://code.jquery.com/jquery-3.7.1.min.js"
       integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
