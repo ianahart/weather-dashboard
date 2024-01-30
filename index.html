@@ -19,10 +19,10 @@
       </section>
     </header>
     <main>
-      <section class="container-xl border">
+      <section class="container-xl">
         <div class="row mt-3">
           <!--Start Form And Recent Searches-->
-          <div class="col-12 col-md-12 col-lg-4 border p-2">
+          <div class="col-12 col-md-12 col-lg-4 p-2">
             <section>
               <h2 class="text-dark">Search For City:</h2>
               <form id="form">
@@ -50,7 +50,16 @@
           </div>
           <!--END Form And Recent Searches-->
           <!--Start Weather Results-->
-          <div class="col-12 col-md-12 col-lg-8 border p-2"></div>
+          <div class="col-12 col-md-12 col-lg-8 p-2">
+            <section
+              id="currentWeather"
+              class="border rounded border w-100 p-1"
+            ></section>
+            <section class="container my-2">
+              <h2 class="h4">5-Day Forecast:</h2>
+              <section id="forecast" class="row"></section>
+            </section>
+          </div>
           <!--End Weather Results-->
         </div>
       </section>
