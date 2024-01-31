@@ -77,6 +77,12 @@ $(document).ready(function () {
     return !(cityVal.trim().length === 0);
   }
 
+  function createTitleDate(weather) {
+    return $('<h3>')
+      .addClass('text-light h6')
+      .text(dayjs(weather.dt_txt).format('MM/DD/YYYY'));
+  }
+
   // display the 5 day weather forecast by looping through the forecast
   // and rendering out a day with the proper properties.
   function displayWeatherForecast(forecast) {
@@ -89,9 +95,7 @@ $(document).ready(function () {
       var forecastCol = $('<div>').addClass(
         'col col-sm-12 col-md-3 col-lg-2 bg-dark rounded p-1 m-md-2'
       );
-      var dateEl = $('<h3>')
-        .addClass('text-light h6')
-        .text(dayjs(forecast[i].dt_txt).format('MM/DD/YYYY'));
+      var dateEl = createTitleDate(forecast[i]);
       var weatherIconEl = createWeatherIconImage(forecast[i].weather[0].icon);
       var statsEl = createCurrentWeatherStats(forecast[i]);
       $(statsEl).addClass('text-light');
@@ -246,6 +250,9 @@ $(document).ready(function () {
   }
 
   // gets the latitude and longitude from OpenWeather API
+  // if it doesnt find lat and long meaning it does not exist
+  // then use the .catch to catch the error and display and error message
+  // in the form
   function getLatAndLon(cityVal) {
     var requestURL =
       baseURL + '/geo/1.0/direct?q=' + cityVal + '&appid=' + API_KEY;
@@ -258,6 +265,14 @@ $(document).ready(function () {
         var lon = data[0].lon;
         getCurrentWeather(lat, lon);
         getWeatherForecast(lat, lon);
+      })
+      .catch(function (err) {
+        if (err) {
+          renderError(
+            $('.search-error'),
+            'Could not find weather results for the city ' + cityVal
+          );
+        }
       });
   }
 
