@@ -30,10 +30,7 @@ $(document).ready(function () {
         city: city.toLowerCase(),
         id: previousSearches.length,
       });
-      displayPreviousSearches(
-        isNew,
-        previousSearches[previousSearches.length - 1]
-      );
+      displayPreviousSearches(isNew, previousSearches[previousSearches.length - 1]);
     }
     localStorage.setItem('searches', JSON.stringify(previousSearches));
   }
@@ -43,17 +40,13 @@ $(document).ready(function () {
     var arr = city.split(' ');
     var titleCased = [];
     for (var i = 0; i < arr.length; i++) {
-      titleCased.push(
-        arr[i].slice(0, 1).toUpperCase() + arr[i].slice(1).toLowerCase()
-      );
+      titleCased.push(arr[i].slice(0, 1).toUpperCase() + arr[i].slice(1).toLowerCase());
     }
     return titleCased.join(' ');
   }
 
   function createPreviousSearch(city) {
-    return $('<button>')
-      .addClass('btn city-btn btn-secondary w-100 my-1')
-      .text(useTitleCase(city));
+    return $('<button>').addClass('btn city-btn btn-secondary w-100 my-1').text(useTitleCase(city));
   }
 
   // create a button for each previous search
@@ -66,9 +59,7 @@ $(document).ready(function () {
     }
 
     for (var i = 0; i < previousSearches.length; i++) {
-      searchesContainerEl.append(
-        createPreviousSearch(previousSearches[i].city)
-      );
+      searchesContainerEl.append(createPreviousSearch(previousSearches[i].city));
     }
   }
 
@@ -78,23 +69,17 @@ $(document).ready(function () {
   }
 
   function createTitleDate(weather) {
-    return $('<h3>')
-      .addClass('text-light h6')
-      .text(dayjs(weather.dt_txt).format('MM/DD/YYYY'));
+    return $('<h3>').addClass('text-light h6').text(dayjs(weather.dt_txt).format('MM/DD/YYYY'));
   }
 
   // display the 5 day weather forecast by looping through the forecast
   // and rendering out a day with the proper properties.
   function displayWeatherForecast(forecast) {
     var forecastContainerEl = $('#forecast');
-    var forecastRow = $('<section>').addClass(
-      'justify-content-around row m-1 gap-1'
-    );
+    var forecastRow = $('<section>').addClass('justify-content-around row m-1 gap-1');
 
     for (var i = 0; i < forecast.length; i++) {
-      var forecastCol = $('<div>').addClass(
-        'col col-sm-12 col-md-3 col-lg-2 bg-dark rounded p-1 m-md-2'
-      );
+      var forecastCol = $('<div>').addClass('col col-sm-12 col-md-3 col-lg-2 bg-dark rounded p-1 m-md-2');
       var dateEl = createTitleDate(forecast[i]);
       var weatherIconEl = createWeatherIconImage(forecast[i].weather[0].icon);
       var statsEl = createCurrentWeatherStats(forecast[i]);
@@ -183,7 +168,6 @@ $(document).ready(function () {
     $(this.reset());
     city = cityVal;
 
-    saveSearch(city, true);
     getLatAndLon(cityVal);
   }
 
@@ -208,14 +192,7 @@ $(document).ready(function () {
   // gets the 5 day forecast from OpenWeather API
   function getWeatherForecast(lat, lon) {
     var requestURL =
-      baseURL +
-      '/data/2.5/forecast?lat=' +
-      lat +
-      '&lon=' +
-      lon +
-      '&units=imperial' +
-      '&appid=' +
-      API_KEY;
+      baseURL + '/data/2.5/forecast?lat=' + lat + '&lon=' + lon + '&units=imperial' + '&appid=' + API_KEY;
 
     fetch(requestURL)
       .then(function (response) {
@@ -229,15 +206,7 @@ $(document).ready(function () {
 
   // gets the current weather from OpenWeather API
   function getCurrentWeather(lat, lon) {
-    var requestURL =
-      baseURL +
-      '/data/2.5/weather?lat=' +
-      lat +
-      '&lon=' +
-      lon +
-      '&units=imperial' +
-      '&appid=' +
-      API_KEY;
+    var requestURL = baseURL + '/data/2.5/weather?lat=' + lat + '&lon=' + lon + '&units=imperial' + '&appid=' + API_KEY;
 
     fetch(requestURL)
       .then(function (response) {
@@ -254,8 +223,7 @@ $(document).ready(function () {
   // then use the .catch to catch the error and display and error message
   // in the form
   function getLatAndLon(cityVal) {
-    var requestURL =
-      baseURL + '/geo/1.0/direct?q=' + cityVal + '&appid=' + API_KEY;
+    var requestURL = baseURL + '/geo/1.0/direct?q=' + cityVal + '&appid=' + API_KEY;
     fetch(requestURL)
       .then(function (response) {
         return response.json();
@@ -263,15 +231,15 @@ $(document).ready(function () {
       .then(function (data) {
         var lat = data[0].lat;
         var lon = data[0].lon;
+        saveSearch(cityVal, true);
+        $('#currentWeather').addClass('border rounded border');
         getCurrentWeather(lat, lon);
         getWeatherForecast(lat, lon);
       })
       .catch(function (err) {
         if (err) {
-          renderError(
-            $('.search-error'),
-            'Could not find weather results for the city ' + cityVal
-          );
+          $('#currentWeather').removeClass('border rounded border');
+          renderError($('.search-error'), 'Could not find weather results for the city ' + cityVal);
         }
       });
   }
