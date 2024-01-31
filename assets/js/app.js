@@ -38,10 +38,22 @@ $(document).ready(function () {
     localStorage.setItem('searches', JSON.stringify(previousSearches));
   }
 
+  // make previous searches title cased
+  function useTitleCase(city) {
+    var arr = city.split(' ');
+    var titleCased = [];
+    for (var i = 0; i < arr.length; i++) {
+      titleCased.push(
+        arr[i].slice(0, 1).toUpperCase() + arr[i].slice(1).toLowerCase()
+      );
+    }
+    return titleCased.join(' ');
+  }
+
   function createPreviousSearch(city) {
     return $('<button>')
       .addClass('btn city-btn btn-secondary w-100 my-1')
-      .text(city);
+      .text(useTitleCase(city));
   }
 
   // create a button for each previous search
@@ -65,24 +77,32 @@ $(document).ready(function () {
     return !(cityVal.trim().length === 0);
   }
 
+  function createTitleDate(weather) {
+    return $('<h3>')
+      .addClass('text-light h6')
+      .text(dayjs(weather.dt_txt).format('MM/DD/YYYY'));
+  }
+
   // display the 5 day weather forecast by looping through the forecast
   // and rendering out a day with the proper properties.
   function displayWeatherForecast(forecast) {
-    var weatherResultsContainer = $('#weatherResults');
-    var forecastRow = $('<section>').addClass('justify-content-around row');
+    var forecastContainerEl = $('#forecast');
+    var forecastRow = $('<section>').addClass(
+      'justify-content-around row m-1 gap-1'
+    );
 
     for (var i = 0; i < forecast.length; i++) {
-      var forecastCol = $('<div>').addClass('col bg-dark rounded m-2 p-1');
-      var dateEl = $('<h3>')
-        .addClass('text-light h6')
-        .text(dayjs(forecast[i].dt_txt).format('MM/DD/YYYY'));
+      var forecastCol = $('<div>').addClass(
+        'col col-sm-12 col-md-3 col-lg-2 bg-dark rounded p-1 m-md-2'
+      );
+      var dateEl = createTitleDate(forecast[i]);
       var weatherIconEl = createWeatherIconImage(forecast[i].weather[0].icon);
       var statsEl = createCurrentWeatherStats(forecast[i]);
       $(statsEl).addClass('text-light');
 
       forecastCol.append(dateEl, weatherIconEl, statsEl);
       forecastRow.append(forecastCol);
-      weatherResultsContainer.append(forecastRow);
+      forecastContainerEl.append(forecastRow);
     }
   }
 
@@ -126,17 +146,13 @@ $(document).ready(function () {
 
   // render the current weather component
   function displayCurrentWeather(data) {
-    var weatherResultsContainer = $('#weatherResults');
-    var currentWeatherContainerEl = $('<section>').addClass(
-      'border rounded border w-100 p-1'
-    );
+    var currentWeatherContainerEl = $('#currentWeather');
+
     var currentWeatherTitleEl = createCurrentWeatherTitle(data);
     currentWeatherTitleEl.appendTo(currentWeatherContainerEl);
 
     var currentWeatherStats = createCurrentWeatherStats(data);
     currentWeatherStats.appendTo(currentWeatherContainerEl);
-
-    currentWeatherContainerEl.appendTo(weatherResultsContainer);
   }
 
   // Render an error for the element passed in and assign it the error message
@@ -152,7 +168,7 @@ $(document).ready(function () {
   function handleFormSubmit(event) {
     event.preventDefault();
 
-    $('#weatherResults').empty();
+    emptyResults();
 
     clearError($('.search-error'));
 
@@ -161,6 +177,7 @@ $(document).ready(function () {
 
     if (!isFormValid) {
       renderError($('.search-error'), 'Please enter a city');
+      return;
     }
 
     $(this.reset());
@@ -233,6 +250,9 @@ $(document).ready(function () {
   }
 
   // gets the latitude and longitude from OpenWeather API
+  // if it doesnt find lat and long meaning it does not exist
+  // then use the .catch to catch the error and display and error message
+  // in the form
   function getLatAndLon(cityVal) {
     var requestURL =
       baseURL + '/geo/1.0/direct?q=' + cityVal + '&appid=' + API_KEY;
@@ -243,17 +263,28 @@ $(document).ready(function () {
       .then(function (data) {
         var lat = data[0].lat;
         var lon = data[0].lon;
-        return getCurrentWeather(lat, lon);
+        getCurrentWeather(lat, lon);
+        getWeatherForecast(lat, lon);
       })
-      .then(function (data) {
-        getWeatherForecast(data.lat, data.lon);
+      .catch(function (err) {
+        if (err) {
+          renderError(
+            $('.search-error'),
+            'Could not find weather results for the city ' + cityVal
+          );
+        }
       });
+  }
+
+  function emptyResults() {
+    $('#currentWeather').empty();
+    $('#forecast').empty();
   }
 
   // search for weather by the button value of the clicked button
   function searchByButtonClick(e) {
     if ($(e.target).is('button')) {
-      $('#weatherResults').empty();
+      emptyResults();
       var cityVal = $(e.target).text();
       city = cityVal;
       getLatAndLon(cityVal);
