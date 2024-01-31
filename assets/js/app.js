@@ -38,10 +38,22 @@ $(document).ready(function () {
     localStorage.setItem('searches', JSON.stringify(previousSearches));
   }
 
+  // make previous searches title cased
+  function useTitleCase(city) {
+    var arr = city.split(' ');
+    var titleCased = [];
+    for (var i = 0; i < arr.length; i++) {
+      titleCased.push(
+        arr[i].slice(0, 1).toUpperCase() + arr[i].slice(1).toLowerCase()
+      );
+    }
+    return titleCased.join(' ');
+  }
+
   function createPreviousSearch(city) {
     return $('<button>')
       .addClass('btn city-btn btn-secondary w-100 my-1')
-      .text(city);
+      .text(useTitleCase(city));
   }
 
   // create a button for each previous search
@@ -69,10 +81,14 @@ $(document).ready(function () {
   // and rendering out a day with the proper properties.
   function displayWeatherForecast(forecast) {
     var forecastContainerEl = $('#forecast');
-    var forecastRow = $('<section>').addClass('justify-content-around row');
+    var forecastRow = $('<section>').addClass(
+      'justify-content-around row m-1 gap-1'
+    );
 
     for (var i = 0; i < forecast.length; i++) {
-      var forecastCol = $('<div>').addClass('col bg-dark rounded m-2 p-1');
+      var forecastCol = $('<div>').addClass(
+        'col col-sm-12 col-md-3 col-lg-2 bg-dark rounded p-1 m-md-2'
+      );
       var dateEl = $('<h3>')
         .addClass('text-light h6')
         .text(dayjs(forecast[i].dt_txt).format('MM/DD/YYYY'));
@@ -240,10 +256,8 @@ $(document).ready(function () {
       .then(function (data) {
         var lat = data[0].lat;
         var lon = data[0].lon;
-        return getCurrentWeather(lat, lon);
-      })
-      .then(function (data) {
-        getWeatherForecast(data.lat, data.lon);
+        getCurrentWeather(lat, lon);
+        getWeatherForecast(lat, lon);
       });
   }
 
