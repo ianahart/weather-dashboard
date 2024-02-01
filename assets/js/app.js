@@ -17,6 +17,7 @@ $(document).ready(function () {
 
   // check to see if search exists if it does do not save it to local storage if not save it to local storage
   function saveSearch(city, isNew) {
+    var MAX_PREVIOUS_SEARCHES = 5;
     var isDuplicate = previousSearches.findIndex(function (search) {
       return search.city === city.toLowerCase();
     });
@@ -26,12 +27,19 @@ $(document).ready(function () {
     }
 
     if (isNew) {
-      previousSearches.push({
+      previousSearches.unshift({
         city: city.toLowerCase(),
-        id: previousSearches.length,
       });
-      displayPreviousSearches(isNew, previousSearches[previousSearches.length - 1]);
+
+      displayPreviousSearches(isNew, previousSearches[0]);
     }
+
+    // if previous searches is equal to five remove the earliest search to keep it under five displayed searches
+    if (previousSearches.length > MAX_PREVIOUS_SEARCHES) {
+      previousSearches = previousSearches.slice(0, MAX_PREVIOUS_SEARCHES);
+      $('#searches').find('button:last').remove();
+    }
+
     localStorage.setItem('searches', JSON.stringify(previousSearches));
   }
 
@@ -57,7 +65,7 @@ $(document).ready(function () {
     var searchesContainerEl = $('#searches');
 
     if (isNew && previousSearch !== null) {
-      searchesContainerEl.append(createPreviousSearch(previousSearch.city));
+      searchesContainerEl.prepend(createPreviousSearch(previousSearch.city));
       return;
     }
 
@@ -85,7 +93,7 @@ $(document).ready(function () {
       var forecastCol = $('<div>').addClass('col col-sm-12 col-md-3 col-lg-2 bg-dark rounded p-1 m-md-2');
       var dateEl = createTitleDate(forecast[i]);
       var weatherIconEl = createWeatherIconImage(forecast[i].weather[0].icon);
-      var statsEl = createCurrentWeatherStats(forecast[i]);
+      var statsEl = createWeatherStats(forecast[i]);
       $(statsEl).addClass('text-light');
 
       forecastCol.append(dateEl, weatherIconEl, statsEl);
@@ -110,7 +118,7 @@ $(document).ready(function () {
     var currentDate = dayjs().format('MM/DD/YYYY');
 
     var titleEl = $('<h2>')
-      .append(city + ' (' + currentDate + ')')
+      .append(useTitleCase(city) + ' (' + currentDate + ')')
       .addClass('text-dark me-2');
     var weatherIconImageEl = createWeatherIconImage(data.weather[0].icon);
 
@@ -121,7 +129,7 @@ $(document).ready(function () {
   }
 
   // append all the weather stats to a container element
-  function createCurrentWeatherStats(data) {
+  function createWeatherStats(data) {
     var containerEl = $('<div>').addClass('m-1');
     var tempEl = $('<p>').text('Temp: ' + data.main.temp + '\u00B0F');
     var windEl = $('<p>').text('Wind: ' + data.wind.speed + 'MPH');
@@ -139,7 +147,7 @@ $(document).ready(function () {
     var currentWeatherTitleEl = createCurrentWeatherTitle(data);
     currentWeatherTitleEl.appendTo(currentWeatherContainerEl);
 
-    var currentWeatherStats = createCurrentWeatherStats(data);
+    var currentWeatherStats = createWeatherStats(data);
     currentWeatherStats.appendTo(currentWeatherContainerEl);
   }
 
