@@ -46,7 +46,10 @@ $(document).ready(function () {
   }
 
   function createPreviousSearch(city) {
-    return $('<button>').addClass('btn city-btn btn-secondary w-100 my-1').text(useTitleCase(city));
+    return $('<button>')
+      .addClass('btn city-btn btn-secondary w-100 my-1')
+      .text(useTitleCase(city))
+      .attr('data-city', city);
   }
 
   // create a button for each previous search
@@ -215,7 +218,6 @@ $(document).ready(function () {
       .then(function (data) {
         displayCurrentWeather(data);
       });
-    return { lat, lon };
   }
 
   // gets the latitude and longitude from OpenWeather API
@@ -253,9 +255,9 @@ $(document).ready(function () {
   function searchByButtonClick(e) {
     if ($(e.target).is('button')) {
       emptyResults();
-      var cityVal = $(e.target).text();
-      city = cityVal;
-      getLatAndLon(cityVal);
+      city = $(e.target).data('city');
+
+      getLatAndLon(city);
     }
   }
 
