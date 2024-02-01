@@ -215,7 +215,6 @@ $(document).ready(function () {
       .then(function (data) {
         displayCurrentWeather(data);
       });
-    return { lat, lon };
   }
 
   // gets the latitude and longitude from OpenWeather API
