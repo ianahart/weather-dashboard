@@ -6,7 +6,6 @@
 
 ![weather_dashboard_sceenshot](https://github.com/ianahart/weather-dashboard/assets/29121238/e2fb7b7a-9734-4333-8083-a84ed57f8cd4)
 
-
 ### Built With
 
 - HTML5
@@ -18,7 +17,7 @@
 
 ### Description
 
-The **Weather Dashboard** lets the user search for the weather in a given city. When you search for the weather of a city you will get the current day weather and also the five-day future forecast. The weather displays the temperature, wind-speed, and humidity. When you submit a search of a city the city will be presisted to **localStorage** so that the user can see a list of previous city searches. When you click on a previous city search you will be given the weather of that city.
+The **Weather Dashboard** lets the user search for the weather in a given city. When you search for the weather of a city you will get the current day weather and also the five-day future forecast. The weather displays the temperature, wind-speed, and humidity. When you submit a search of a city the city will be presisted to **localStorage** so that the user can see a list of previous city searches. The previous city searches list can only hold 5 previous cities starting with the most recent. I implemented this because I did not want the previous city searches to scroll way down the page. When you click on a previous city search you will be given the weather of that city.
 
 ### Installation
 
